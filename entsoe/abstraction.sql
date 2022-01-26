@@ -153,7 +153,7 @@ create table network_generator (
 );
 
 create table network_converter (
-    converter_id integer primary key,
+    converter_id integer,
     bus0         integer not null references network_bus(bus_id),
     bus1         integer not null references network_bus(bus_id)
     -- geometry     geometry(Point, 4326)
@@ -207,6 +207,15 @@ insert into network_converter (converter_id, bus0, bus1)
       where s.converter
         and n.topology_name = 'Converter Station Back-to-back'
         and coalesce(d.station_id, de.terminal_id) is not null;
+
+create table raw_linedata(
+    geometry text
+);
+
+-- LINES+LINKS raw data
+insert into raw_linedata (geometry)
+    select st_astext(st_transform(e.line_extent, 4326))
+	from topology_edges e;
 
 -- AC lines
 insert into network_line (line_id, bus0, bus1, voltage, circuits,

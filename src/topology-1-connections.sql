@@ -55,10 +55,27 @@ insert into topology_connections (line_id, station_id)
          on st_dwithin(st_startpoint(extent), area, radius[1]) or
             st_dwithin(st_endpoint(extent), area, radius[2]);
 
+create table raw_linedata_1 (
+    line_id integer primary key,
+    geometry text
+);
+
+insert into raw_linedata_1 (line_id, geometry)
+    select l.line_id, st_astext(st_transform(l.extent, 4326))
+	from power_line l;
+
+create table topology_edges_helper (
+    line_id integer primary key,
+	station_id integer array
+);
+
+insert into topology_edges_helper (line_id, station_id)
+    select line_id, array_agg(station_id)
+	from topology_connections group by line_id having count(*) > 1;
+
 insert into topology_edges (line_id, station_id, line_extent, topology_name)
-   select c.line_id, c.station_id, l.extent, l.power_name from (
-        select line_id, array_agg(station_id) from topology_connections group by line_id having count(*) = 2
-    ) c (line_id, station_id)
+   select c.line_id, c.station_id, l.extent, l.power_name
+   from topology_edges_helper c
     join power_line l on c.line_id = l.line_id;
 
 insert into topology_nodes (station_id, line_id, station_location, topology_name)

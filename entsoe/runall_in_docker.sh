@@ -4,10 +4,10 @@ BASE=$(realpath $PWD/..)
 PGUSER=postgres
 PGPASSWORD=mysecretpassword
 
-echo
-echo "Download geojson from mapbox"
-echo "============================"
-docker run -it -v $BASE:/app:rw -w /app/entsoe node:8.16.0-alpine sh download.sh
+#echo
+#echo "Download geojson from mapbox"
+#echo "============================"
+#docker run -it -v $BASE:/app:rw -w /app/entsoe node:8.16.0-alpine sh download.sh
 
 echo
 echo "Start postgis database server"
