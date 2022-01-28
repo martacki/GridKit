@@ -32,6 +32,16 @@ docker run -it --link gridkit-postgis:postgres --rm \
     mdillon/postgis \
     bash -c 'env PGHOST="$POSTGRES_PORT_5432_TCP_ADDR" PGPORT="$POSTGRES_PORT_5432_TCP_PORT" ./run.sh'
 
+# overwrite existing lines.csv joining lines.csv, lines_3.csv, lines_4.csv and lines_5.csv:
+echo
+echo "Join all Lines"
+echo "=============="
+docker run -it --link gridkit-postgis:postgres --rm \
+	   -v $BASE:/app:rw -w /app/entsoe \
+	   -e PGUSER=$PGUSER -e PGPASSWORD=$PGPASSWORD \
+	   python:2 \
+	   bash -c 'pip install pandas && python update_lines.py'
+
 echo
 echo "Tear down postgis server"
 echo "========================"

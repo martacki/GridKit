@@ -156,6 +156,34 @@ create table network_line_3 (
     -- geometry     geometry(LineString, 4326)
 );
 
+create table network_line_4 (
+    line_id      integer primary key,
+    bus0         integer references network_bus (bus_id),
+    bus1         integer references network_bus (bus_id),
+    voltage      integer,
+    circuits     integer not null,
+    "length"     numeric,
+    underground  boolean not null,
+    under_construction boolean not null,
+    tags         hstore,
+    geometry     text
+    -- geometry     geometry(LineString, 4326)
+);
+
+create table network_line_5 (
+    line_id      integer primary key,
+    bus0         integer references network_bus (bus_id),
+    bus1         integer references network_bus (bus_id),
+    voltage      integer,
+    circuits     integer not null,
+    "length"     numeric,
+    underground  boolean not null,
+    under_construction boolean not null,
+    tags         hstore,
+    geometry     text
+    -- geometry     geometry(LineString, 4326)
+);
+
 create table network_generator (
     generator_id integer primary key,
     bus_id       integer not null references network_bus(bus_id),
@@ -257,6 +285,34 @@ insert into network_line_3 (line_id, bus0, bus1, voltage, circuits,
        join station_terminal s on s.station_id = e.station_id[2]
         and s.voltage = l.voltage and not s.dc
        join station_terminal d on d.station_id = e.station_id[3]
+        and d.voltage = l.voltage and not d.dc
+      where not l.dc_line;
+
+insert into network_line_4 (line_id, bus0, bus1, voltage, circuits,
+                            underground, under_construction, "length", tags, geometry)
+     select e.line_id, s.network_bus_id, d.network_bus_id,
+            l.voltage, l.circuits, l.underground, l.under_construction,
+            st_length(st_transform(e.line_extent, 4326)::geography), l.tags,
+            st_astext(st_transform(e.line_extent, 4326))
+       from topology_edges_4 e
+       join line_structure l   on l.line_id = e.line_id
+       join station_terminal s on s.station_id = e.station_id[3]
+        and s.voltage = l.voltage and not s.dc
+       join station_terminal d on d.station_id = e.station_id[4]
+        and d.voltage = l.voltage and not d.dc
+      where not l.dc_line;
+
+insert into network_line_5 (line_id, bus0, bus1, voltage, circuits,
+                            underground, under_construction, "length", tags, geometry)
+     select e.line_id, s.network_bus_id, d.network_bus_id,
+            l.voltage, l.circuits, l.underground, l.under_construction,
+            st_length(st_transform(e.line_extent, 4326)::geography), l.tags,
+            st_astext(st_transform(e.line_extent, 4326))
+       from topology_edges_5 e
+       join line_structure l   on l.line_id = e.line_id
+       join station_terminal s on s.station_id = e.station_id[4]
+        and s.voltage = l.voltage and not s.dc
+       join station_terminal d on d.station_id = e.station_id[5]
         and d.voltage = l.voltage and not d.dc
       where not l.dc_line;
 
